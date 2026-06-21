@@ -16,7 +16,6 @@ import type {
   ApiResponse,
 } from '@/types';
 import { generateId, STAGE_DURATIONS, randomBetween, sleep } from '@/lib/utils';
-import { MOCK_STAGE_IMAGES } from './mockImages';
 
 // ─── Simulated API base URL (replace with real FastAPI URL) ──
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -89,23 +88,23 @@ export async function getDetectionResults(sessionId: string): Promise<ApiRespons
       vehicles: [
         {
           id: generateId('VH'),
-          category: 'car',
-          confidence: 0.941,
-          boundingBox: { x: 0.38, y: 0.33, width: 0.25, height: 0.40 },
+          category: 'motorcycle',
+          confidence: 0.924,
+          boundingBox: { x: 0.15, y: 0.36, width: 0.20, height: 0.45 },
           trackingId: 'TRK-201',
         },
         {
           id: generateId('VH'),
-          category: 'auto_rickshaw',
-          confidence: 0.882,
-          boundingBox: { x: 0.12, y: 0.40, width: 0.19, height: 0.27 },
+          category: 'motorcycle',
+          confidence: 0.951,
+          boundingBox: { x: 0.62, y: 0.33, width: 0.21, height: 0.47 },
           trackingId: 'TRK-202',
         },
         {
           id: generateId('VH'),
-          category: 'truck',
-          confidence: 0.914,
-          boundingBox: { x: 0.69, y: 0.29, width: 0.22, height: 0.38 },
+          category: 'car',
+          confidence: 0.912,
+          boundingBox: { x: 0.41, y: 0.38, width: 0.16, height: 0.20 },
           trackingId: 'TRK-203',
         },
       ],
@@ -113,8 +112,14 @@ export async function getDetectionResults(sessionId: string): Promise<ApiRespons
         {
           id: generateId('DR'),
           category: 'pedestrian',
-          confidence: 0.952,
-          boundingBox: { x: 0.42, y: 0.35, width: 0.10, height: 0.15 },
+          confidence: 0.931,
+          boundingBox: { x: 0.18, y: 0.32, width: 0.08, height: 0.15 },
+        },
+        {
+          id: generateId('DR'),
+          category: 'pedestrian',
+          confidence: 0.942,
+          boundingBox: { x: 0.65, y: 0.30, width: 0.08, height: 0.15 },
         },
       ],
       riders: [],
@@ -129,22 +134,22 @@ export async function getDetectionResults(sessionId: string): Promise<ApiRespons
         {
           id: generateId('VH'),
           category: 'motorcycle',
-          confidence: 0.953,
-          boundingBox: { x: 0.21, y: 0.52, width: 0.12, height: 0.20 },
+          confidence: 0.971,
+          boundingBox: { x: 0.26, y: 0.41, width: 0.16, height: 0.33 },
           trackingId: 'TRK-301',
         },
         {
           id: generateId('VH'),
-          category: 'bus',
-          confidence: 0.971,
-          boundingBox: { x: 0.42, y: 0.33, width: 0.26, height: 0.46 },
+          category: 'motorcycle',
+          confidence: 0.942,
+          boundingBox: { x: 0.57, y: 0.39, width: 0.17, height: 0.35 },
           trackingId: 'TRK-302',
         },
         {
           id: generateId('VH'),
           category: 'bicycle',
           confidence: 0.854,
-          boundingBox: { x: 0.73, y: 0.54, width: 0.10, height: 0.17 },
+          boundingBox: { x: 0.78, y: 0.54, width: 0.10, height: 0.17 },
           trackingId: 'TRK-303',
         },
       ],
@@ -152,8 +157,14 @@ export async function getDetectionResults(sessionId: string): Promise<ApiRespons
         {
           id: generateId('DR'),
           category: 'pedestrian',
+          confidence: 0.961,
+          boundingBox: { x: 0.29, y: 0.35, width: 0.06, height: 0.12 },
+        },
+        {
+          id: generateId('DR'),
+          category: 'pedestrian',
           confidence: 0.924,
-          boundingBox: { x: 0.23, y: 0.48, width: 0.05, height: 0.08 },
+          boundingBox: { x: 0.60, y: 0.33, width: 0.06, height: 0.12 },
         },
       ],
       riders: [],
@@ -249,16 +260,29 @@ export async function getViolationResults(sessionId: string): Promise<ApiRespons
     data = [
       {
         id: generateId('VIO'),
-        type: 'stop_line_violation',
-        label: 'Stop-Line Violation',
-        severity: 'medium',
-        confidence: 0.887,
+        type: 'helmet_non_compliance',
+        label: 'Helmet Non-Compliance (Left Vehicle)',
+        severity: 'high',
+        confidence: 0.924,
         description:
-          'Vehicle detected crossing the designated stop line at the intersection while the signal was red.',
+          'Driver detected operating motorcycle without protective headgear. License plate: TN 09BL 0196.',
         affectedEntities: ['TRK-201'],
-        legalReference: 'MV Act Section 119',
-        fineAmount: 500,
-        boundingBox: { x: 0.38, y: 0.33, width: 0.25, height: 0.40 },
+        legalReference: 'MV Act Section 129',
+        fineAmount: 1000,
+        boundingBox: { x: 0.15, y: 0.36, width: 0.20, height: 0.45 },
+      },
+      {
+        id: generateId('VIO'),
+        type: 'helmet_non_compliance',
+        label: 'Helmet Non-Compliance (Right Vehicle)',
+        severity: 'high',
+        confidence: 0.951,
+        description:
+          'Driver detected operating motorcycle without protective headgear. License plate: TN 09BJ 4054.',
+        affectedEntities: ['TRK-202'],
+        legalReference: 'MV Act Section 129',
+        fineAmount: 1000,
+        boundingBox: { x: 0.62, y: 0.33, width: 0.21, height: 0.47 },
       },
     ];
   } else if (imageSet === 'test3') {
@@ -268,13 +292,39 @@ export async function getViolationResults(sessionId: string): Promise<ApiRespons
         type: 'wrong_side_driving',
         label: 'Wrong-Side Driving',
         severity: 'critical',
-        confidence: 0.952,
+        confidence: 0.971,
         description:
-          'Motorcycle detected traveling in the opposite direction of lane flow, posing an immediate danger to other motorists.',
+          'Motorcycle detected traveling in reverse direction of street flow. License plate: MH 12HA 5097.',
         affectedEntities: ['TRK-301'],
         legalReference: 'MV Act Section 184',
         fineAmount: 5000,
-        boundingBox: { x: 0.21, y: 0.52, width: 0.12, height: 0.20 },
+        boundingBox: { x: 0.26, y: 0.41, width: 0.16, height: 0.33 },
+      },
+      {
+        id: generateId('VIO'),
+        type: 'helmet_non_compliance',
+        label: 'Helmet Non-Compliance (Wrong-Side Rider)',
+        severity: 'high',
+        confidence: 0.952,
+        description:
+          'Driver on wrong-side motorcycle traveling without protective helmet. License plate: MH 12HA 5097.',
+        affectedEntities: ['TRK-301'],
+        legalReference: 'MV Act Section 129',
+        fineAmount: 1000,
+        boundingBox: { x: 0.26, y: 0.41, width: 0.16, height: 0.33 },
+      },
+      {
+        id: generateId('VIO'),
+        type: 'helmet_non_compliance',
+        label: 'Helmet Non-Compliance (Right Rider)',
+        severity: 'high',
+        confidence: 0.942,
+        description:
+          'Motorcycle rider to the right of the violator traveling without protective headgear. License plate: MH 12 HK 8561.',
+        affectedEntities: ['TRK-302'],
+        legalReference: 'MV Act Section 129',
+        fineAmount: 1000,
+        boundingBox: { x: 0.57, y: 0.39, width: 0.17, height: 0.35 },
       },
     ];
   } else {
@@ -328,32 +378,32 @@ export async function getLicensePlateResult(sessionId: string): Promise<ApiRespo
   if (imageSet === 'test2') {
     data = {
       detected: true,
-      plateNumber: 'MH 12 PQ 7890',
-      ocrConfidence: 0.927,
+      plateNumber: 'TN 09BJ 4054 / TN 09BL 0196',
+      ocrConfidence: 0.951,
       plateType: 'private',
-      state: 'Maharashtra',
+      state: 'Tamil Nadu',
       registrationDetails: {
         owner: 'REDACTED (PII)',
-        vehicleType: 'Car (Sedan)',
-        registrationYear: 2019,
+        vehicleType: 'Motorcycles (Dual Offense)',
+        registrationYear: 2020,
         insuranceValid: true,
       },
-      boundingBox: { x: 0.48, y: 0.60, width: 0.10, height: 0.05 },
+      boundingBox: { x: 0.65, y: 0.70, width: 0.15, height: 0.05 },
     };
   } else if (imageSet === 'test3') {
     data = {
       detected: true,
-      plateNumber: 'DL 3C AY 4567',
-      ocrConfidence: 0.941,
+      plateNumber: 'MH 12HA 5097 / MH 12 HK 8561',
+      ocrConfidence: 0.971,
       plateType: 'private',
-      state: 'Delhi',
+      state: 'Maharashtra',
       registrationDetails: {
         owner: 'REDACTED (PII)',
-        vehicleType: 'Motorcycle',
-        registrationYear: 2022,
+        vehicleType: 'Motorcycles (Multi-Plate)',
+        registrationYear: 2021,
         insuranceValid: true,
       },
-      boundingBox: { x: 0.24, y: 0.63, width: 0.08, height: 0.04 },
+      boundingBox: { x: 0.28, y: 0.65, width: 0.13, height: 0.05 },
     };
   } else {
     // Default / Test 1
@@ -394,12 +444,12 @@ export async function getSystemMetrics(sessionId: string): Promise<ApiResponse<S
     timestamp: new Date().toISOString(),
     processingTimeMs: randomBetween(100, 300),
     data: {
-      overallConfidence: imageSet === 'test1' ? 0.938 : imageSet === 'test2' ? 0.915 : 0.947,
-      detectionConfidence: imageSet === 'test1' ? 0.941 : imageSet === 'test2' ? 0.923 : 0.951,
-      precision: imageSet === 'test1' ? 0.923 : imageSet === 'test2' ? 0.908 : 0.936,
-      recall: imageSet === 'test1' ? 0.907 : imageSet === 'test2' ? 0.892 : 0.918,
-      f1Score: imageSet === 'test1' ? 0.915 : imageSet === 'test2' ? 0.900 : 0.927,
-      mAP: imageSet === 'test1' ? 0.891 : imageSet === 'test2' ? 0.874 : 0.909,
+      overallConfidence: imageSet === 'test1' ? 0.938 : imageSet === 'test2' ? 0.935 : 0.957,
+      detectionConfidence: imageSet === 'test1' ? 0.941 : imageSet === 'test2' ? 0.937 : 0.961,
+      precision: imageSet === 'test1' ? 0.923 : imageSet === 'test2' ? 0.918 : 0.945,
+      recall: imageSet === 'test1' ? 0.907 : imageSet === 'test2' ? 0.902 : 0.928,
+      f1Score: imageSet === 'test1' ? 0.915 : imageSet === 'test2' ? 0.910 : 0.936,
+      mAP: imageSet === 'test1' ? 0.891 : imageSet === 'test2' ? 0.884 : 0.918,
       processingTimeMs: randomBetween(26000, 38000),
       framesPerSecond: 12.4,
       memoryUsageMB: 1842,
@@ -458,13 +508,13 @@ function buildEvidence(sessionId: string, imageUrl: string): Evidence {
       intersection: imageSet === 'test1'
         ? 'Pune-Mumbai Highway Junction 14A'
         : imageSet === 'test2'
-        ? 'Delhi Ring Road - Stop Line Segment B'
-        : 'Bengaluru Outer Ring Road - Wrong Side Lane',
+        ? 'Chennai Mount Road - Junction Segment C'
+        : 'Pune-Bengaluru Expressway Highway Node 4',
       coordinates: imageSet === 'test1'
         ? { lat: 18.5204, lng: 73.8567 }
         : imageSet === 'test2'
-        ? { lat: 28.6139, lng: 77.2090 }
-        : { lat: 12.9716, lng: 77.5946 },
+        ? { lat: 13.0827, lng: 80.2707 }
+        : { lat: 18.5204, lng: 73.8567 },
     },
     annotatedImageUrl: customImageUrl,
     rawImageUrl: imageUrl,
@@ -491,7 +541,7 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         model: 'YOLOv9-traffic-v2.1.0',
-        detectedEntities: imageSet === 'test1' ? 9 : 3,
+        detectedEntities: 3,
         inferenceDevice: 'CUDA GPU',
         gpuMemoryUsedMB: 1842,
         confidenceThreshold: 0.45,
@@ -501,7 +551,7 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         model: 'TrafficEnforcer-ViolationNet-v1.4',
-        violationsFound: imageSet === 'test1' ? 2 : 1,
+        violationsFound: imageSet === 'test3' ? 3 : 2,
         rulesEvaluated: 12,
         ruleEngine: 'spatial_constraint_v2',
       };
@@ -509,23 +559,21 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         classesEvaluated: 7,
-        topClassConfidence: imageSet === 'test1' ? 0.961 : imageSet === 'test2' ? 0.887 : 0.952,
+        topClassConfidence: imageSet === 'test1' ? 0.961 : imageSet === 'test2' ? 0.951 : 0.971,
         model: 'TrafficEnforcer-Classifier-v1.2',
       };
     case 'lpr':
       return {
         ...base,
-        platesDetected: 1,
+        platesDetected: imageSet === 'test1' ? 1 : 2,
         ocrEngine: 'TrOCR-traffic-v2',
-        plateConfidence: imageSet === 'test1' ? 0.943 : imageSet === 'test2' ? 0.927 : 0.941,
-        characterConfidence: imageSet === 'test1'
-          ? [0.97, 0.99, 0.95, 0.98, 0.96, 0.94, 0.97, 0.99]
-          : [0.95, 0.94, 0.98, 0.99, 0.93, 0.92, 0.96, 0.97, 0.94, 0.95],
+        plateConfidence: imageSet === 'test1' ? 0.943 : imageSet === 'test2' ? 0.951 : 0.971,
+        characterConfidence: [0.97, 0.99, 0.95, 0.98, 0.96, 0.94, 0.97, 0.99],
       };
     case 'evidence':
       return {
         ...base,
-        annotationsAdded: imageSet === 'test1' ? 8 : 4,
+        annotationsAdded: imageSet === 'test3' ? 6 : 4,
         watermarkApplied: true,
         evidencePackageSize: '4.2 MB',
         hashAlgorithm: 'SHA-256',
@@ -534,17 +582,17 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         metricsComputed: 8,
-        precision: imageSet === 'test1' ? 0.923 : imageSet === 'test2' ? 0.908 : 0.936,
-        recall: imageSet === 'test1' ? 0.907 : imageSet === 'test2' ? 0.892 : 0.918,
-        f1Score: imageSet === 'test1' ? 0.915 : imageSet === 'test2' ? 0.900 : 0.927,
-        mAP: imageSet === 'test1' ? 0.891 : imageSet === 'test2' ? 0.874 : 0.909,
+        precision: imageSet === 'test1' ? 0.923 : imageSet === 'test2' ? 0.918 : 0.945,
+        recall: imageSet === 'test1' ? 0.907 : imageSet === 'test2' ? 0.902 : 0.928,
+        f1Score: imageSet === 'test1' ? 0.915 : imageSet === 'test2' ? 0.910 : 0.936,
+        mAP: imageSet === 'test1' ? 0.891 : imageSet === 'test2' ? 0.884 : 0.918,
       };
     case 'report':
       return {
         ...base,
         reportFormat: 'JSON + PDF',
         sectionsGenerated: 6,
-        totalFindings: imageSet === 'test1' ? 2 : 1,
+        totalFindings: imageSet === 'test3' ? 3 : 2,
       };
     default:
       return base;
