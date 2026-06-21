@@ -132,6 +132,6 @@ export const useAnalysisStore = create<AnalysisStore>()(
           session: { ...initialSession, stages: buildInitialStages() },
         })),
     }),
-    { name: 'GridLock.AnalysisStore' }
+    { name: 'TrafficEnforcer.AnalysisStore' }
   )
 );

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'GridLock — AI Traffic Violation Detection',
+  title: 'Traffic Enforcer — AI Traffic Violation Detection',
   description:
     'Enterprise-grade AI platform for automated traffic violation detection, license plate recognition, and evidence generation. Built for government agencies and traffic enforcement teams.',
   keywords: [
@@ -25,9 +25,9 @@ export const metadata: Metadata = {
     'computer vision',
     'traffic analytics',
   ],
-  authors: [{ name: 'GridLock Platform' }],
+  authors: [{ name: 'Traffic Enforcer Platform' }],
   openGraph: {
-    title: 'GridLock — AI Traffic Violation Detection',
+    title: 'Traffic Enforcer — AI Traffic Violation Detection',
     description: 'Automated traffic enforcement powered by computer vision and AI',
     type: 'website',
   },

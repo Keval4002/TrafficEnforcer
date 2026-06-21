@@ -1,5 +1,5 @@
 // ============================================================
-// GridLock — Utility Functions
+// Traffic Enforcer — Utility Functions
 // ============================================================
 
 import { type ClassValue, clsx } from 'clsx';
@@ -43,7 +43,7 @@ export function formatDuration(ms: number): string {
 }
 
 /** Generate a unique session/evidence ID */
-export function generateId(prefix = 'GL'): string {
+export function generateId(prefix = 'TE'): string {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 7).toUpperCase();
   return `${prefix}-${timestamp}-${random}`;
@@ -148,14 +148,14 @@ export const PIPELINE_STAGE_ORDER: StageId[] = [
 
 /** Realistic processing time ranges per stage (in ms) */
 export const STAGE_DURATIONS: Record<StageId, [number, number]> = {
-  preprocessing: [2500, 4000],
-  detection: [5000, 8000],
+  preprocessing: [6000, 10000],
+  detection: [6000, 10000],
   violation_detection: [6000, 10000],
-  classification: [3000, 5000],
-  lpr: [4000, 7000],
-  evidence: [2000, 4000],
-  analytics: [3000, 5000],
-  report: [1000, 2000],
+  classification: [6000, 10000],
+  lpr: [6000, 10000],
+  evidence: [6000, 10000],
+  analytics: [6000, 10000],
+  report: [6000, 10000],
 };
 
 /** Get a random integer between min and max (inclusive) */

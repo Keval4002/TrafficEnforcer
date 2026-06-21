@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
-// ─── GridLock Logo Mark ───────────────────────────────────────
+// ─── Traffic Enforcer Logo Mark ───────────────────────────────
 
 function LogoMark({ className }: { className?: string }) {
   return (
@@ -55,7 +55,7 @@ export function TopNav({ className }: TopNavProps) {
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
           <LogoMark className="transition-opacity group-hover:opacity-70" />
-          <span className="text-sm font-semibold text-[#0a0a0a] tracking-tight">AI Traffic Enforcement</span>
+          <span className="text-sm font-semibold text-[#0a0a0a] tracking-tight">Traffic Enforcer</span>
         </Link>
 
         {/* Center: Breadcrumb on analysis pages */}

@@ -6,7 +6,7 @@ import { CapabilitiesGrid } from '@/components/dashboard/CapabilitiesGrid';
 import { StatsBar } from '@/components/dashboard/StatsBar';
 
 export const metadata: Metadata = {
-  title: 'GridLock — AI Traffic Violation Detection',
+  title: 'Traffic Enforcer — AI Traffic Violation Detection',
   description:
     'Upload traffic footage for automated violation detection, license plate recognition, and evidence generation.',
 };

@@ -1,5 +1,5 @@
 // ============================================================
-// GridLock — AI Traffic Violation Detection System
+// Traffic Enforcer — AI Traffic Violation Detection System
 // Type Definitions
 // ============================================================
 

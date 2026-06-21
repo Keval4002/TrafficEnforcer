@@ -96,7 +96,7 @@ export function ImageCanvas() {
       <div className="h-10 bg-[#111] border-t border-white/5 flex items-center px-5 gap-4 flex-shrink-0">
         <div className="flex items-center gap-2 text-xs font-mono text-white/30">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-          <span>GridLock Vision Engine</span>
+          <span>Traffic Enforcer Vision Engine</span>
         </div>
         <div className="h-3 w-px bg-white/10" />
         {activeStageId && (

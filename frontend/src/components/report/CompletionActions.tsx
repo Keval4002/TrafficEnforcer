@@ -30,7 +30,7 @@ export function CompletionActions({ caseNumber }: CompletionActionsProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `gridlock-report-${caseNumber ?? 'export'}.json`;
+    a.download = `traffic-enforcer-report-${caseNumber ?? 'export'}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
