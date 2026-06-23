@@ -69,9 +69,23 @@ export function UploadZone() {
 
     setTimeout(() => {
       setIsUploading(false);
-      setError(
-        "Metadata extraction failed: Image EXIF headers are missing the standard camera profile, which is required for AI spatial coordinate calibration and traffic lane triangulation. Please upload a standard camera-captured JPEG/PNG or try one of the pre-calibrated example images on the left."
-      );
+      const isMockError = process.env.NEXT_PUBLIC_MOCK_UPLOAD_ERROR !== 'false';
+      if (isMockError) {
+        setError(
+          "Metadata extraction failed: Image EXIF headers are missing the standard camera profile, which is required for AI spatial coordinate calibration and traffic lane triangulation. Please upload a standard camera-captured JPEG/PNG or try one of the pre-calibrated example images on the left."
+        );
+      } else {
+        const image: UploadedImage = {
+          id: generateId('IMG'),
+          file: file,
+          previewUrl: URL.createObjectURL(file),
+          name: file.name,
+          sizeBytes: file.size,
+          mimeType: file.type,
+          uploadedAt: new Date().toISOString(),
+        };
+        setUploadedImage(image);
+      }
     }, 1800);
   }, []);
 

@@ -24,6 +24,23 @@ export { API_BASE_URL }; // exported for easy reference when integrating
 // Keep track of sessionId to imageSet mapping
 const sessionImageSets = new Map<string, string>();
 
+// Helper to get stage image name with correct extensions (e.g. supporting custom user test1 images)
+function getStageImageName(imageSet: string, stageId: StageId): string {
+  if (imageSet === 'test1') {
+    const mapping: Record<string, string> = {
+      preprocessing: 'preprocessing.jpg.jpeg',
+      detection: 'detection.jpg.jpeg',
+      violation_detection: 'violation_detection.png',
+      classification: 'classification.png',
+      lpr: 'lpr.png',
+      evidence: 'evidence.png',
+      analytics: 'analytics.jpeg',
+    };
+    return mapping[stageId] || `${stageId}.jpg`;
+  }
+  return `${stageId}.jpg`;
+}
+
 // ─── Stage Processing Simulation ─────────────────────────────
 
 export async function processStage(
@@ -63,7 +80,7 @@ export async function processStage(
   const nextStage = currentIndex < STAGE_ORDER.length - 1 ? STAGE_ORDER[currentIndex + 1] : undefined;
 
   // Serve the generated mock image set
-  const stageImageUrl = stageId === 'report' ? null : `/mock-images/${imageSet}/${stageId}.jpg`;
+  const stageImageUrl = stageId === 'report' ? null : `/mock-images/${imageSet}/${getStageImageName(imageSet, stageId)}`;
 
   return {
     stageId,
@@ -496,7 +513,7 @@ export async function getFinalReport(sessionId: string, imageUrl: string): Promi
 
 function buildEvidence(sessionId: string, imageUrl: string): Evidence {
   const imageSet = sessionImageSets.get(sessionId) || 'test1';
-  const customImageUrl = `/mock-images/${imageSet}/evidence.jpg`;
+  const customImageUrl = `/mock-images/${imageSet}/${getStageImageName(imageSet, 'evidence')}`;
   
   return {
     evidenceId: generateId('EVD'),
