@@ -20,6 +20,7 @@ export function usePipeline() {
   const runPipeline = useCallback(
     async (image: UploadedImage) => {
       abortRef.current = false;
+      const startTime = Date.now();
 
       // Generate session ID and initialize
       const sessionId = generateId('SES');
@@ -64,6 +65,16 @@ export function usePipeline() {
           store.setStageStatus(stageId, 'error');
           break;
         }
+      }
+
+      if (abortRef.current) return;
+
+      // Wait for the 90 seconds timer to complete before showing the final report
+      const maxTimeMs = 90000;
+      const elapsed = Date.now() - startTime;
+      const remaining = maxTimeMs - elapsed;
+      if (remaining > 0 && !abortRef.current) {
+        await new Promise((r) => setTimeout(r, remaining));
       }
 
       if (abortRef.current) return;

@@ -22,11 +22,49 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
   const session = useAnalysisStore((s) => s.session);
   const router = useRouter();
 
+  const isReport =
+    session.view === 'report' &&
+    session.report &&
+    (session.selectedStageId === 'report' || session.selectedStageId === null);
+
   // Resolve params
   const [sessionId, setSessionId] = React.useState<string | null>(null);
   useEffect(() => {
     params.then((p) => setSessionId(p.id));
   }, [params]);
+
+  // Approx Timer State & Countdown
+  const [timeLeft, setTimeLeft] = React.useState(90);
+  const startedAt = session.startedAt;
+
+  React.useEffect(() => {
+    if (!startedAt || isReport) {
+      return;
+    }
+
+    const calculateTimeLeft = () => {
+      const start = new Date(startedAt).getTime();
+      const elapsedSec = Math.floor((Date.now() - start) / 1000);
+      return Math.max(90 - elapsedSec, 0);
+    };
+
+    setTimeLeft(calculateTimeLeft());
+
+    const interval = setInterval(() => {
+      const remaining = calculateTimeLeft();
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(interval);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [startedAt, isReport]);
+
+  const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+  const seconds = (timeLeft % 60).toString().padStart(2, '0');
+  const progressPercent = Math.min(((90 - timeLeft) / 90) * 100, 100);
 
   // Redirect if no uploaded image (e.g. direct URL access)
   useEffect(() => {
@@ -35,10 +73,7 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
     }
   }, [sessionId, session.uploadedImage, session.id, router]);
 
-  const isReport =
-    session.view === 'report' &&
-    session.report &&
-    (session.selectedStageId === 'report' || session.selectedStageId === null);
+
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden">
@@ -53,6 +88,32 @@ export default function AnalysisPage({ params }: AnalysisPageProps) {
           {!isReport ? (
             /* ── Processing View ── */
             <div className="flex-1 flex flex-col min-h-0">
+              {/* Approx Timer Banner */}
+              <div className="bg-gray-50 border-b border-gray-200 px-6 py-3.5 flex items-center justify-between gap-4 flex-shrink-0 select-none">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full border-2 border-orange-500 border-t-transparent animate-spin flex-shrink-0" />
+                  <div>
+                    <h2 className="text-xs font-semibold text-[#0a0a0a] tracking-tight">AI Pipeline Execution</h2>
+                    <p className="text-[10px] text-gray-400 font-mono">Max completion time: ~1.5 minutes</p>
+                  </div>
+                </div>
+                
+                {/* Timer progress bar and formatted countdown */}
+                <div className="flex items-center gap-4 w-full max-w-md">
+                  <div className="flex-1 bg-gray-200/80 h-2 rounded-full overflow-hidden border border-gray-300/10">
+                    <div 
+                      className="bg-gradient-to-r from-orange-500 to-red-500 h-full rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-semibold text-gray-700 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-md min-w-[50px] text-center shadow-sm">
+                      {minutes}:{seconds}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex-1 min-h-0">
                 <ImageCanvas />
               </div>

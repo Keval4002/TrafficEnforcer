@@ -23,7 +23,7 @@ const TEST_INPUTS = [
   },
   {
     id: 'testImage2',
-    title: 'Example Image 2',
+    title: 'Example Image 1',
     name: 'testImage2.jpeg',
     previewUrl: '/testImage2.jpeg',
     sizeBytes: 77454,
@@ -32,7 +32,7 @@ const TEST_INPUTS = [
   },
   {
     id: 'testImage3',
-    title: 'Example Image 3',
+    title: 'Example Image 2',
     name: 'testImage3.avif',
     previewUrl: '/testImage3.avif',
     sizeBytes: 49160,
@@ -167,7 +167,7 @@ export function UploadZone() {
           </div>
 
           <div className="grid grid-cols-1 gap-3">
-            {TEST_INPUTS.map((test) => (
+            {TEST_INPUTS.filter((test) => test.id !== 'testImage1').map((test) => (
               <button
                 key={test.id}
                 onClick={() => handleSelectTestImage(test)}

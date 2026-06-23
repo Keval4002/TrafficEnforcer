@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Car, User, Users, PersonStanding } from 'lucide-react';
+import { Car } from 'lucide-react';
 import { Card, MetricCard } from '@/components/ui/Card';
 import type { DetectionResult } from '@/types';
 
@@ -24,26 +24,11 @@ export function DetectionSummary({ detection }: DetectionSummaryProps) {
       <SectionHeader title="Detection Results" subtitle="Entities identified in the scene" />
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3">
         <MetricCard
           icon={<Car size={16} strokeWidth={1.5} />}
           label="Vehicles"
           value={detection.vehicles.length}
-        />
-        <MetricCard
-          icon={<User size={16} strokeWidth={1.5} />}
-          label="Drivers"
-          value={detection.drivers.length}
-        />
-        <MetricCard
-          icon={<Users size={16} strokeWidth={1.5} />}
-          label="Riders"
-          value={detection.riders.length}
-        />
-        <MetricCard
-          icon={<PersonStanding size={16} strokeWidth={1.5} />}
-          label="Pedestrians"
-          value={detection.pedestrians.length}
         />
       </div>
 

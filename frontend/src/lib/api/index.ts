@@ -192,7 +192,7 @@ export async function getDetectionResults(sessionId: string): Promise<ApiRespons
   } else {
     // Default/Test 1
     data = {
-      totalDetections: 6,
+      totalDetections: 5,
       vehicles: [
         {
           id: generateId('VH'),
@@ -215,43 +215,24 @@ export async function getDetectionResults(sessionId: string): Promise<ApiRespons
           boundingBox: { x: 0.72, y: 0.40, width: 0.20, height: 0.32 },
           trackingId: 'TRK-003',
         },
-      ],
-      drivers: [
         {
-          id: generateId('DR'),
-          category: 'pedestrian',
-          confidence: 0.934,
-          boundingBox: { x: 0.13, y: 0.30, width: 0.08, height: 0.14 },
+          id: generateId('VH'),
+          category: 'motorcycle',
+          confidence: 0.852,
+          boundingBox: { x: 0.35, y: 0.45, width: 0.15, height: 0.25 },
+          trackingId: 'TRK-004',
         },
         {
-          id: generateId('DR'),
-          category: 'pedestrian',
-          confidence: 0.912,
-          boundingBox: { x: 0.57, y: 0.25, width: 0.07, height: 0.12 },
-        },
-      ],
-      riders: [
-        {
-          id: generateId('RD'),
-          category: 'pedestrian',
-          confidence: 0.878,
-          boundingBox: { x: 0.17, y: 0.32, width: 0.06, height: 0.11 },
-        },
-        {
-          id: generateId('RD'),
-          category: 'pedestrian',
-          confidence: 0.843,
-          boundingBox: { x: 0.20, y: 0.33, width: 0.06, height: 0.11 },
+          id: generateId('VH'),
+          category: 'auto_rickshaw',
+          confidence: 0.903,
+          boundingBox: { x: 0.05, y: 0.50, width: 0.22, height: 0.30 },
+          trackingId: 'TRK-005',
         },
       ],
-      pedestrians: [
-        {
-          id: generateId('PD'),
-          category: 'pedestrian',
-          confidence: 0.901,
-          boundingBox: { x: 0.38, y: 0.45, width: 0.05, height: 0.18 },
-        },
-      ],
+      drivers: [],
+      riders: [],
+      pedestrians: [],
       processingTimeMs: randomBetween(5000, 8000),
       modelVersion: 'TrafficEnforcer-CV-v2.1.0',
     };
@@ -354,24 +335,9 @@ export async function getViolationResults(sessionId: string): Promise<ApiRespons
         severity: 'critical',
         confidence: 0.961,
         description:
-          'Two riders detected on the motorcycle without helmets. Both the rider and pillion passenger are in violation of mandatory helmet laws.',
+          'One riders detected on the motorcycle without helmets. The rider is in violation of mandatory helmet laws.',
         affectedEntities: ['TRK-001'],
-        legalReference: 'MV Act Section 129',
-        fineAmount: 1000,
         boundingBox: { x: 0.12, y: 0.30, width: 0.18, height: 0.20 },
-      },
-      {
-        id: generateId('VIO'),
-        type: 'triple_riding',
-        label: 'Triple Riding',
-        severity: 'high',
-        confidence: 0.934,
-        description:
-          'Three persons detected on a single two-wheeler, which is a serious violation of traffic safety regulations.',
-        affectedEntities: ['TRK-001'],
-        legalReference: 'MV Act Section 128',
-        fineAmount: 1000,
-        boundingBox: { x: 0.10, y: 0.28, width: 0.22, height: 0.32 },
       },
     ];
   }
@@ -428,7 +394,7 @@ export async function getLicensePlateResult(sessionId: string): Promise<ApiRespo
       detected: true,
       plateNumber: 'AP 28R 6104',
       ocrConfidence: 0.943,
-      plateType: 'private',
+      plateType: 'unknown',
       state: 'Andhra Pradesh',
       registrationDetails: {
         owner: 'REDACTED (PII)',
@@ -558,7 +524,7 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         model: 'YOLOv9-traffic-v2.1.0',
-        detectedEntities: 3,
+        detectedEntities: imageSet === 'test1' ? 5 : 3,
         inferenceDevice: 'CUDA GPU',
         gpuMemoryUsedMB: 1842,
         confidenceThreshold: 0.45,
@@ -568,7 +534,7 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         model: 'TrafficEnforcer-ViolationNet-v1.4',
-        violationsFound: imageSet === 'test3' ? 3 : 2,
+        violationsFound: imageSet === 'test3' ? 3 : imageSet === 'test2' ? 2 : 1,
         rulesEvaluated: 12,
         ruleEngine: 'spatial_constraint_v2',
       };
@@ -590,7 +556,7 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
     case 'evidence':
       return {
         ...base,
-        annotationsAdded: imageSet === 'test3' ? 6 : 4,
+        annotationsAdded: imageSet === 'test3' ? 6 : imageSet === 'test2' ? 4 : 6,
         watermarkApplied: true,
         evidencePackageSize: '4.2 MB',
         hashAlgorithm: 'SHA-256',
@@ -609,7 +575,7 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
         ...base,
         reportFormat: 'JSON + PDF',
         sectionsGenerated: 6,
-        totalFindings: imageSet === 'test3' ? 3 : 2,
+        totalFindings: imageSet === 'test3' ? 3 : imageSet === 'test2' ? 2 : 1,
       };
     default:
       return base;
