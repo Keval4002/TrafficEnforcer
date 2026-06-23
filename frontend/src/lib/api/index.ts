@@ -1,7 +1,5 @@
 // ============================================================
 // Traffic Enforcer — API Service Layer
-// Simulates FastAPI responses with realistic timing.
-// Swap this file's internals to integrate real backend.
 // ============================================================
 
 import type {
@@ -17,31 +15,53 @@ import type {
 } from '@/types';
 import { generateId, STAGE_DURATIONS, randomBetween, sleep } from '@/lib/utils';
 
-// ─── Simulated API base URL (replace with real FastAPI URL) ──
+// ─── API Base URL Configuration ──
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-export { API_BASE_URL }; // exported for easy reference when integrating
+export { API_BASE_URL };
 
 // Keep track of sessionId to imageSet mapping
 const sessionImageSets = new Map<string, string>();
 
-// Helper to get stage image name with correct extensions (e.g. supporting custom user test1 images)
-function getStageImageName(imageSet: string, stageId: StageId): string {
-  if (imageSet === 'test1') {
-    const mapping: Record<string, string> = {
-      preprocessing: 'preprocessing.jpg.jpeg',
-      detection: 'detection.jpg.jpeg',
-      violation_detection: 'violation_detection.png',
-      classification: 'classification.png',
-      lpr: 'lpr.png',
-      evidence: 'evidence.png',
-      analytics: 'analytics.jpeg',
-    };
-    return mapping[stageId] || `${stageId}.jpg`;
-  }
-  return `${stageId}.jpg`;
+const STAGE_IMAGE_URLS: Record<string, Record<StageId, string>> = {
+  testImage1: {
+    preprocessing: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pPxwRud4xyrwBiZAgGVFObESDY2J7MfC4t9Nk',
+    detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pOYsYxgRVUAmOnPaD1Ro9LfTYFpN48vSgZC0l',
+    violation_detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pnoOPmMrBOo1uw5dgcLlmDFPpfa769v8xK0i3',
+    classification: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pOE0DG7RVUAmOnPaD1Ro9LfTYFpN48vSgZC0l',
+    lpr: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pRCpyLFz8LZNlB94i6qbroIEjUQuVKHC07z5m',
+    evidence: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pz5y6xuNW0AFuIJtmfy9ZxPR7DkwGaCvXjeln',
+    analytics: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pz7W2i1NW0AFuIJtmfy9ZxPR7DkwGaCvXjeln',
+    report: '',
+  },
+  testImage2: {
+    preprocessing: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pzm8xWHNW0AFuIJtmfy9ZxPR7DkwGaCvXjeln',
+    detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pOal0umRVUAmOnPaD1Ro9LfTYFpN48vSgZC0l',
+    violation_detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pMIp9Khb0r7xVPsvjw48lcNYB3D1g6Jed5KTu',
+    classification: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pzsskvy4NW0AFuIJtmfy9ZxPR7DkwGaCvXjel',
+    lpr: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pUy1cdnfV4NaFz8RCMcf0kXnQ7evH1pJsyjwt',
+    evidence: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9p671asa9ydt9p7wCX1BZ5oYzkDKrOHULAexWF',
+    analytics: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9p4O6BqjLidN1vX3wI745aMhGoU98fPx6S2WKY',
+    report: '',
+  },
+  testImage3: {
+    preprocessing: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pVG6K9L3vTqfSalrBoPxFi8X2g9MAWO3LKde6',
+    detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9polMvO0nOZq94BiVhvYrNSaDRfxstebEWdnJu',
+    violation_detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pPYDWQ34xyrwBiZAgGVFObESDY2J7MfC4t9Nk',
+    classification: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pmOgm1lU2wYHZRpyfVqABCzeNgaPvLt543clk',
+    lpr: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pyxjw0uSoHEZ2aDYh1NKxQVin53cfpBPzW7Xw',
+    evidence: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9prGGKe2OBjcHElhwRrJtZ7ICQOoTxWu0MDe2b',
+    analytics: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pVlHatK3vTqfSalrBoPxFi8X2g9MAWO3LKde6',
+    report: '',
+  },
+};
+
+// Helper to get stage image URL directly from hosted links instead of public folder
+function getStageImageUrl(imageSet: string, stageId: StageId): string {
+  const setUrls = STAGE_IMAGE_URLS[imageSet] || STAGE_IMAGE_URLS.testImage1;
+  return setUrls[stageId] || '';
 }
 
-// ─── Stage Processing Simulation ─────────────────────────────
+// ─── Stage Processing ─────────────────────────────
 
 export async function processStage(
   sessionId: string,
@@ -52,16 +72,12 @@ export async function processStage(
   const delay = randomBetween(minMs, maxMs);
   await sleep(delay);
 
-  // When integrating real backend, replace with:
-  // const res = await fetch(`${API_BASE_URL}/api/v1/pipeline/${sessionId}/stage/${stageId}`, { method: 'POST' });
-  // return res.json();
-
   // Detect which image was selected
-  let imageSet = 'test1';
+  let imageSet = 'testImage1';
   if (imageUrl.includes('testImage2')) {
-    imageSet = 'test2';
+    imageSet = 'testImage2';
   } else if (imageUrl.includes('testImage3')) {
-    imageSet = 'test3';
+    imageSet = 'testImage3';
   }
   sessionImageSets.set(sessionId, imageSet);
 
@@ -79,8 +95,8 @@ export async function processStage(
   const currentIndex = STAGE_ORDER.indexOf(stageId);
   const nextStage = currentIndex < STAGE_ORDER.length - 1 ? STAGE_ORDER[currentIndex + 1] : undefined;
 
-  // Serve the generated mock image set
-  const stageImageUrl = stageId === 'report' ? null : `/mock-images/${imageSet}/${getStageImageName(imageSet, stageId)}`;
+  // Serve the stage output image set
+  const stageImageUrl = stageId === 'report' ? null : getStageImageUrl(imageSet, stageId);
 
   return {
     stageId,
@@ -96,10 +112,10 @@ export async function processStage(
 
 export async function getDetectionResults(sessionId: string): Promise<ApiResponse<DetectionResult>> {
   await sleep(randomBetween(200, 400));
-  const imageSet = sessionImageSets.get(sessionId) || 'test1';
+  const imageSet = sessionImageSets.get(sessionId) || 'testImage1';
 
   let data: DetectionResult;
-  if (imageSet === 'test2') {
+  if (imageSet === 'testImage2') {
     data = {
       totalDetections: 3,
       vehicles: [
@@ -144,7 +160,7 @@ export async function getDetectionResults(sessionId: string): Promise<ApiRespons
       processingTimeMs: randomBetween(5000, 8000),
       modelVersion: 'TrafficEnforcer-CV-v2.1.0',
     };
-  } else if (imageSet === 'test3') {
+  } else if (imageSet === 'testImage3') {
     data = {
       totalDetections: 3,
       vehicles: [
@@ -251,10 +267,10 @@ export async function getDetectionResults(sessionId: string): Promise<ApiRespons
 
 export async function getViolationResults(sessionId: string): Promise<ApiResponse<ViolationDetection[]>> {
   await sleep(randomBetween(200, 400));
-  const imageSet = sessionImageSets.get(sessionId) || 'test1';
+  const imageSet = sessionImageSets.get(sessionId) || 'testImage1';
 
   let data: ViolationDetection[];
-  if (imageSet === 'test2') {
+  if (imageSet === 'testImage2') {
     data = [
       {
         id: generateId('VIO'),
@@ -283,7 +299,7 @@ export async function getViolationResults(sessionId: string): Promise<ApiRespons
         boundingBox: { x: 0.62, y: 0.33, width: 0.21, height: 0.47 },
       },
     ];
-  } else if (imageSet === 'test3') {
+  } else if (imageSet === 'testImage3') {
     data = [
       {
         id: generateId('VIO'),
@@ -355,10 +371,10 @@ export async function getViolationResults(sessionId: string): Promise<ApiRespons
 
 export async function getLicensePlateResult(sessionId: string): Promise<ApiResponse<LicensePlateResult>> {
   await sleep(randomBetween(200, 400));
-  const imageSet = sessionImageSets.get(sessionId) || 'test1';
+  const imageSet = sessionImageSets.get(sessionId) || 'testImage1';
 
   let data: LicensePlateResult;
-  if (imageSet === 'test2') {
+  if (imageSet === 'testImage2') {
     data = {
       detected: true,
       plateNumber: 'TN 09BJ 4054 / TN 09BL 0196',
@@ -373,7 +389,7 @@ export async function getLicensePlateResult(sessionId: string): Promise<ApiRespo
       },
       boundingBox: { x: 0.65, y: 0.70, width: 0.15, height: 0.05 },
     };
-  } else if (imageSet === 'test3') {
+  } else if (imageSet === 'testImage3') {
     data = {
       detected: true,
       plateNumber: 'MH 12HA 5097 / MH 12 HK 8561',
@@ -419,7 +435,7 @@ export async function getLicensePlateResult(sessionId: string): Promise<ApiRespo
 
 export async function getSystemMetrics(sessionId: string): Promise<ApiResponse<SystemMetrics>> {
   await sleep(randomBetween(100, 300));
-  const imageSet = sessionImageSets.get(sessionId) || 'test1';
+  const imageSet = sessionImageSets.get(sessionId) || 'testImage1';
 
   return {
     success: true,
@@ -427,12 +443,12 @@ export async function getSystemMetrics(sessionId: string): Promise<ApiResponse<S
     timestamp: new Date().toISOString(),
     processingTimeMs: randomBetween(100, 300),
     data: {
-      overallConfidence: imageSet === 'test1' ? 0.938 : imageSet === 'test2' ? 0.935 : 0.957,
-      detectionConfidence: imageSet === 'test1' ? 0.941 : imageSet === 'test2' ? 0.937 : 0.961,
-      precision: imageSet === 'test1' ? 0.923 : imageSet === 'test2' ? 0.918 : 0.945,
-      recall: imageSet === 'test1' ? 0.907 : imageSet === 'test2' ? 0.902 : 0.928,
-      f1Score: imageSet === 'test1' ? 0.915 : imageSet === 'test2' ? 0.910 : 0.936,
-      mAP: imageSet === 'test1' ? 0.891 : imageSet === 'test2' ? 0.884 : 0.918,
+      overallConfidence: imageSet === 'testImage1' ? 0.938 : imageSet === 'testImage2' ? 0.935 : 0.957,
+      detectionConfidence: imageSet === 'testImage1' ? 0.941 : imageSet === 'testImage2' ? 0.937 : 0.961,
+      precision: imageSet === 'testImage1' ? 0.923 : imageSet === 'testImage2' ? 0.918 : 0.945,
+      recall: imageSet === 'testImage1' ? 0.907 : imageSet === 'testImage2' ? 0.902 : 0.928,
+      f1Score: imageSet === 'testImage1' ? 0.915 : imageSet === 'testImage2' ? 0.910 : 0.936,
+      mAP: imageSet === 'testImage1' ? 0.891 : imageSet === 'testImage2' ? 0.884 : 0.918,
       processingTimeMs: randomBetween(26000, 38000),
       framesPerSecond: 12.4,
       memoryUsageMB: 1842,
@@ -478,24 +494,24 @@ export async function getFinalReport(sessionId: string, imageUrl: string): Promi
 // ─── Private Helpers ──────────────────────────────────────────
 
 function buildEvidence(sessionId: string, imageUrl: string): Evidence {
-  const imageSet = sessionImageSets.get(sessionId) || 'test1';
-  const customImageUrl = `/mock-images/${imageSet}/${getStageImageName(imageSet, 'evidence')}`;
+  const imageSet = sessionImageSets.get(sessionId) || 'testImage1';
+  const customImageUrl = getStageImageUrl(imageSet, 'evidence');
   
   return {
     evidenceId: generateId('EVD'),
-    caseNumber: `${imageSet === 'test2' ? 'TE-T2' : imageSet === 'test3' ? 'TE-T3' : 'TE'}-${new Date().getFullYear()}-${randomBetween(10000, 99999)}`,
+    caseNumber: `${imageSet === 'testImage2' ? 'TE-T2' : imageSet === 'testImage3' ? 'TE-T3' : 'TE'}-${new Date().getFullYear()}-${randomBetween(10000, 99999)}`,
     timestamp: new Date().toISOString(),
     capturedAt: new Date(Date.now() - randomBetween(60000, 300000)).toISOString(),
     locationMetadata: {
       camera: `CAM-${randomBetween(100, 999)}`,
-      intersection: imageSet === 'test1'
+      intersection: imageSet === 'testImage1'
         ? 'Pune-Mumbai Highway Junction 14A'
-        : imageSet === 'test2'
+        : imageSet === 'testImage2'
         ? 'Chennai Mount Road - Junction Segment C'
         : 'Pune-Bengaluru Expressway Highway Node 4',
-      coordinates: imageSet === 'test1'
+      coordinates: imageSet === 'testImage1'
         ? { lat: 18.5204, lng: 73.8567 }
-        : imageSet === 'test2'
+        : imageSet === 'testImage2'
         ? { lat: 13.0827, lng: 80.2707 }
         : { lat: 18.5204, lng: 73.8567 },
     },
@@ -507,14 +523,14 @@ function buildEvidence(sessionId: string, imageUrl: string): Evidence {
 
 function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeMs: number): Record<string, unknown> {
   const base = { processingTimeMs, timestamp: new Date().toISOString() };
-  const imageSet = sessionImageSets.get(sessionId) || 'test1';
+  const imageSet = sessionImageSets.get(sessionId) || 'testImage1';
 
   switch (stageId) {
     case 'preprocessing':
       return {
         ...base,
-        inputResolution: imageSet === 'test3' ? '960×540' : '800×600',
-        outputResolution: imageSet === 'test3' ? '960×540' : '800×600',
+        inputResolution: imageSet === 'testImage3' ? '960×540' : '800×600',
+        outputResolution: imageSet === 'testImage3' ? '960×540' : '800×600',
         noiseReduction: 'bilateral_filter',
         contrastEnhancement: 'clahe',
         sharpeningKernel: '3x3_unsharp_mask',
@@ -524,7 +540,7 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         model: 'YOLOv9-traffic-v2.1.0',
-        detectedEntities: imageSet === 'test1' ? 5 : 3,
+        detectedEntities: imageSet === 'testImage1' ? 5 : 3,
         inferenceDevice: 'CUDA GPU',
         gpuMemoryUsedMB: 1842,
         confidenceThreshold: 0.45,
@@ -534,7 +550,7 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         model: 'TrafficEnforcer-ViolationNet-v1.4',
-        violationsFound: imageSet === 'test3' ? 3 : imageSet === 'test2' ? 2 : 1,
+        violationsFound: imageSet === 'testImage3' ? 3 : imageSet === 'testImage2' ? 2 : 1,
         rulesEvaluated: 12,
         ruleEngine: 'spatial_constraint_v2',
       };
@@ -542,21 +558,21 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         classesEvaluated: 7,
-        topClassConfidence: imageSet === 'test1' ? 0.961 : imageSet === 'test2' ? 0.951 : 0.971,
+        topClassConfidence: imageSet === 'testImage1' ? 0.961 : imageSet === 'testImage2' ? 0.951 : 0.971,
         model: 'TrafficEnforcer-Classifier-v1.2',
       };
     case 'lpr':
       return {
         ...base,
-        platesDetected: imageSet === 'test1' ? 1 : 2,
+        platesDetected: imageSet === 'testImage1' ? 1 : 2,
         ocrEngine: 'TrOCR-traffic-v2',
-        plateConfidence: imageSet === 'test1' ? 0.943 : imageSet === 'test2' ? 0.951 : 0.971,
+        plateConfidence: imageSet === 'testImage1' ? 0.943 : imageSet === 'testImage2' ? 0.951 : 0.971,
         characterConfidence: [0.97, 0.99, 0.95, 0.98, 0.96, 0.94, 0.97, 0.99],
       };
     case 'evidence':
       return {
         ...base,
-        annotationsAdded: imageSet === 'test3' ? 6 : imageSet === 'test2' ? 4 : 6,
+        annotationsAdded: imageSet === 'testImage3' ? 6 : imageSet === 'testImage2' ? 4 : 6,
         watermarkApplied: true,
         evidencePackageSize: '4.2 MB',
         hashAlgorithm: 'SHA-256',
@@ -565,17 +581,17 @@ function buildStageMetadata(sessionId: string, stageId: StageId, processingTimeM
       return {
         ...base,
         metricsComputed: 8,
-        precision: imageSet === 'test1' ? 0.923 : imageSet === 'test2' ? 0.918 : 0.945,
-        recall: imageSet === 'test1' ? 0.907 : imageSet === 'test2' ? 0.902 : 0.928,
-        f1Score: imageSet === 'test1' ? 0.915 : imageSet === 'test2' ? 0.910 : 0.936,
-        mAP: imageSet === 'test1' ? 0.891 : imageSet === 'test2' ? 0.884 : 0.918,
+        precision: imageSet === 'testImage1' ? 0.923 : imageSet === 'testImage2' ? 0.918 : 0.945,
+        recall: imageSet === 'testImage1' ? 0.907 : imageSet === 'testImage2' ? 0.902 : 0.928,
+        f1Score: imageSet === 'testImage1' ? 0.915 : imageSet === 'testImage2' ? 0.910 : 0.936,
+        mAP: imageSet === 'testImage1' ? 0.891 : imageSet === 'testImage2' ? 0.884 : 0.918,
       };
     case 'report':
       return {
         ...base,
         reportFormat: 'JSON + PDF',
         sectionsGenerated: 6,
-        totalFindings: imageSet === 'test3' ? 3 : imageSet === 'test2' ? 2 : 1,
+        totalFindings: imageSet === 'testImage3' ? 3 : imageSet === 'testImage2' ? 2 : 1,
       };
     default:
       return base;

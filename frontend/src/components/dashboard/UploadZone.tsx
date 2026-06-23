@@ -69,8 +69,8 @@ export function UploadZone() {
 
     setTimeout(() => {
       setIsUploading(false);
-      const isMockError = process.env.NEXT_PUBLIC_MOCK_UPLOAD_ERROR !== 'false';
-      if (isMockError) {
+      const forceCalibrationError = process.env.NEXT_PUBLIC_FORCE_CALIBRATION_ERROR !== 'false';
+      if (forceCalibrationError) {
         setError(
           "Metadata extraction failed: Image EXIF headers are missing the standard camera profile, which is required for AI spatial coordinate calibration and traffic lane triangulation. Please upload a standard camera-captured JPEG/PNG or try one of the pre-calibrated example images on the left."
         );

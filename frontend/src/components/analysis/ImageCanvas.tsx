@@ -26,11 +26,13 @@ export function ImageCanvas() {
   // Track key for fade animation on image change
   const [imageKey, setImageKey] = useState(0);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [isImageLoading, setIsImageLoading] = useState(true);
 
   useEffect(() => {
     if (currentImageUrl !== prevUrl) {
       setImageKey((k) => k + 1);
       setPrevUrl(currentImageUrl);
+      setIsImageLoading(true);
     }
   }, [currentImageUrl, prevUrl]);
 
@@ -52,21 +54,34 @@ export function ImageCanvas() {
         {currentImageUrl ? (
           <div
             key={imageKey}
-            className="relative max-w-full max-h-full image-fadeIn"
+            className="relative max-w-full max-h-full flex items-center justify-center"
             style={{ maxHeight: 'calc(100vh - 200px)' }}
           >
+            {isImageLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-10 rounded-lg">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-8 h-8 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+                  <span className="text-xs font-mono text-white/60">Loading stage output...</span>
+                </div>
+              </div>
+            )}
+
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={currentImageUrl}
               alt={`Analysis output — ${displayStageId ? STAGE_LABELS[displayStageId] : 'Original'}`}
-              className="max-w-full max-h-full object-contain"
+              className={cn(
+                "max-w-full max-h-full object-contain transition-all duration-300 ease-out",
+                isImageLoading ? "opacity-30 scale-[0.98] blur-sm" : "opacity-100 scale-100 blur-0"
+              )}
               style={{ maxHeight: 'calc(100vh - 200px)' }}
               draggable={false}
+              onLoad={() => setIsImageLoading(false)}
             />
 
             {/* Stage label overlay */}
             {displayStageId && (
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10">
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 z-20">
                 <span className="text-xs font-mono text-white/60">Stage</span>
                 <span className="text-xs font-semibold text-white">
                   {STAGE_LABELS[displayStageId]}
@@ -76,7 +91,7 @@ export function ImageCanvas() {
 
             {/* Processing indicator overlay */}
             {isProcessing && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-[1px]">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-[1px] z-20">
                 <ProcessingIndicator stageName={STAGE_LABELS[activeStageId as StageId]} />
               </div>
             )}

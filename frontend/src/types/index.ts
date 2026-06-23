@@ -1,5 +1,5 @@
 // ============================================================
-// Traffic Enforcer — AI Traffic Violation Detection System
+// Traffic Enforcer — Traffic Violation Detection System
 // Type Definitions
 // ============================================================
 
