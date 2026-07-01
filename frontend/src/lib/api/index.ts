@@ -34,14 +34,14 @@ const STAGE_IMAGE_URLS: Record<string, Record<StageId, string>> = {
     report: '',
   },
   testImage2: {
-    preprocessing: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pzm8xWHNW0AFuIJtmfy9ZxPR7DkwGaCvXjeln',
-    detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pOal0umRVUAmOnPaD1Ro9LfTYFpN48vSgZC0l',
-    violation_detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pMIp9Khb0r7xVPsvjw48lcNYB3D1g6Jed5KTu',
-    classification: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pzsskvy4NW0AFuIJtmfy9ZxPR7DkwGaCvXjel',
-    lpr: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pUy1cdnfV4NaFz8RCMcf0kXnQ7evH1pJsyjwt',
-    evidence: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9p671asa9ydt9p7wCX1BZ5oYzkDKrOHULAexWF',
-    analytics: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9p4O6BqjLidN1vX3wI745aMhGoU98fPx6S2WKY',
-    report: '',
+    preprocessing: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pQAbLF4ggUDCiztEMldhGY8pIQ5Tqx9V6uLB2',
+    detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9p8FMno1wzXyoC4I9WODHNgRPmTMG6LJB1fiuK',
+    violation_detection: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pql2B0THPCceSmgLiGR3fn4Okby7Xr6vhV9jI',
+    classification: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9p3njlLK6ZBvaxn3zW6qH7kLdRVhZMr18OEDft',
+    lpr: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pY7nHFCVOLDw9CjirtyHnP27z43cK0JSXAlWg',
+    evidence: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pkIp3oR7iXVvw43pRE1lK9Q5UBbduFYZo6M7A',
+    analytics: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pfbcnCv31R4EQOVJGsZMUYLldjxyA31THSW9z',
+    report: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9p66DTGH9ydt9p7wCX1BZ5oYzkDKrOHULAexWF',
   },
   testImage3: {
     preprocessing: 'https://4sy3dr5w6m.ufs.sh/f/6viMwy9ydt9pVG6K9L3vTqfSalrBoPxFi8X2g9MAWO3LKde6',
@@ -73,11 +73,13 @@ export async function processStage(
   await sleep(delay);
 
   // Detect which image was selected
-  let imageSet = 'testImage1';
+  let imageSet = sessionImageSets.get(sessionId) || 'testImage1';
   if (imageUrl.includes('testImage2')) {
     imageSet = 'testImage2';
   } else if (imageUrl.includes('testImage3')) {
     imageSet = 'testImage3';
+  } else if (imageUrl.includes('testImage1')) {
+    imageSet = 'testImage1';
   }
   sessionImageSets.set(sessionId, imageSet);
 
@@ -117,42 +119,35 @@ export async function getDetectionResults(sessionId: string): Promise<ApiRespons
   let data: DetectionResult;
   if (imageSet === 'testImage2') {
     data = {
-      totalDetections: 3,
+      totalDetections: 2,
       vehicles: [
-        {
-          id: generateId('VH'),
-          category: 'motorcycle',
-          confidence: 0.924,
-          boundingBox: { x: 0.15, y: 0.36, width: 0.20, height: 0.45 },
-          trackingId: 'TRK-201',
-        },
         {
           id: generateId('VH'),
           category: 'motorcycle',
           confidence: 0.951,
           boundingBox: { x: 0.62, y: 0.33, width: 0.21, height: 0.47 },
-          trackingId: 'TRK-202',
+          trackingId: 'TRK-201',
         },
         {
           id: generateId('VH'),
-          category: 'car',
-          confidence: 0.912,
-          boundingBox: { x: 0.41, y: 0.38, width: 0.16, height: 0.20 },
-          trackingId: 'TRK-203',
+          category: 'motorcycle',
+          confidence: 0.924,
+          boundingBox: { x: 0.15, y: 0.36, width: 0.20, height: 0.45 },
+          trackingId: 'TRK-202',
         },
       ],
       drivers: [
         {
           id: generateId('DR'),
           category: 'pedestrian',
-          confidence: 0.931,
-          boundingBox: { x: 0.18, y: 0.32, width: 0.08, height: 0.15 },
+          confidence: 0.942,
+          boundingBox: { x: 0.65, y: 0.30, width: 0.08, height: 0.15 },
         },
         {
           id: generateId('DR'),
           category: 'pedestrian',
-          confidence: 0.942,
-          boundingBox: { x: 0.65, y: 0.30, width: 0.08, height: 0.15 },
+          confidence: 0.931,
+          boundingBox: { x: 0.18, y: 0.32, width: 0.08, height: 0.15 },
         },
       ],
       riders: [],
@@ -274,29 +269,42 @@ export async function getViolationResults(sessionId: string): Promise<ApiRespons
     data = [
       {
         id: generateId('VIO'),
-        type: 'helmet_non_compliance',
-        label: 'Helmet Non-Compliance (Left Vehicle)',
+        type: 'triple_riding',
+        label: 'Triple Seating',
         severity: 'high',
-        confidence: 0.924,
+        confidence: 0.942,
         description:
-          'Driver detected operating motorcycle without protective headgear. License plate: TN 09BL 0196.',
+          'Three passengers detected on a single two-wheeler. License plate: TN 09BJ 4054.',
         affectedEntities: ['TRK-201'],
-        legalReference: 'MV Act Section 129',
+        legalReference: 'MV Act Section 128',
         fineAmount: 1000,
-        boundingBox: { x: 0.15, y: 0.36, width: 0.20, height: 0.45 },
+        boundingBox: { x: 0.62, y: 0.33, width: 0.21, height: 0.47 },
       },
       {
         id: generateId('VIO'),
         type: 'helmet_non_compliance',
-        label: 'Helmet Non-Compliance (Right Vehicle)',
+        label: 'Helmet Non-Compliance',
         severity: 'high',
         confidence: 0.951,
         description:
           'Driver detected operating motorcycle without protective headgear. License plate: TN 09BJ 4054.',
-        affectedEntities: ['TRK-202'],
+        affectedEntities: ['TRK-201'],
         legalReference: 'MV Act Section 129',
         fineAmount: 1000,
         boundingBox: { x: 0.62, y: 0.33, width: 0.21, height: 0.47 },
+      },
+      {
+        id: generateId('VIO'),
+        type: 'helmet_non_compliance',
+        label: 'Helmet Non-Compliance',
+        severity: 'high',
+        confidence: 0.924,
+        description:
+          'Driver detected operating motorcycle without protective headgear. License plate: TN 03 BT 1198S.',
+        affectedEntities: ['TRK-202'],
+        legalReference: 'MV Act Section 129',
+        fineAmount: 1000,
+        boundingBox: { x: 0.15, y: 0.36, width: 0.20, height: 0.45 },
       },
     ];
   } else if (imageSet === 'testImage3') {
@@ -377,7 +385,7 @@ export async function getLicensePlateResult(sessionId: string): Promise<ApiRespo
   if (imageSet === 'testImage2') {
     data = {
       detected: true,
-      plateNumber: 'TN 09BJ 4054 / TN 09BL 0196',
+      plateNumber: 'TN 09BJ 4054 / TN 03 BT 1198S',
       ocrConfidence: 0.951,
       plateType: 'private',
       state: 'Tamil Nadu',

@@ -23,7 +23,7 @@ const TEST_INPUTS = [
   },
   {
     id: 'testImage2',
-    title: 'Example Image 1',
+    title: 'Example Image 2',
     name: 'testImage2.jpeg',
     previewUrl: '/testImage2.jpeg',
     sizeBytes: 77454,
@@ -67,6 +67,7 @@ export function UploadZone() {
 
     setIsUploading(true);
 
+    const uploadDelay = Math.floor(Math.random() * 7000) + 6000;
     setTimeout(() => {
       setIsUploading(false);
       const forceCalibrationError = process.env.NEXT_PUBLIC_FORCE_CALIBRATION_ERROR !== 'false';
@@ -86,7 +87,7 @@ export function UploadZone() {
         };
         setUploadedImage(image);
       }
-    }, 1800);
+    }, uploadDelay);
   }, []);
 
   const handleSelectTestImage = useCallback((test: typeof TEST_INPUTS[0]) => {
@@ -167,7 +168,7 @@ export function UploadZone() {
           </div>
 
           <div className="grid grid-cols-1 gap-3">
-            {TEST_INPUTS.filter((test) => test.id !== 'testImage1').map((test) => (
+            {TEST_INPUTS.filter((test) => test.id !== 'testImage3').map((test) => (
               <button
                 key={test.id}
                 onClick={() => handleSelectTestImage(test)}
